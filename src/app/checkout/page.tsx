@@ -3,8 +3,34 @@
 import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useGlobalState } from '@/components/providers/GlobalStateProvider';
-import Image from 'next/image';
 import Link from 'next/link';
+
+// Warm welcome popup notification
+function BookingToast({ name, roomName }: { name: string; roomName: string }) {
+    const [visible, setVisible] = useState(false);
+
+    useEffect(() => {
+        const show = setTimeout(() => setVisible(true), 400);
+        const hide = setTimeout(() => setVisible(false), 6000);
+        return () => { clearTimeout(show); clearTimeout(hide); };
+    }, []);
+
+    return (
+        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 w-[90vw] max-w-md transition-all duration-700 ease-out ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-10'}`}>
+            <div className="bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl px-6 py-4 shadow-2xl flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <div>
+                    <p className="text-white font-semibold text-sm">Welcome to Bosco Hotel, {name}! 🎉</p>
+                    <p className="text-white/60 text-xs mt-1">Your {roomName} is reserved & confirmed. We can't wait to host you!</p>
+                </div>
+            </div>
+        </div>
+    );
+}
 
 function CheckoutContent() {
     const searchParams = useSearchParams();
@@ -67,38 +93,85 @@ function CheckoutContent() {
         }, 2000);
     };
 
+    // ─── SUCCESS / CONFIRMATION SCREEN ───────────────────────────────────────
     if (success) {
         return (
-            <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center p-8 text-center text-white">
-                <div className="animate-[fade-in_1s_ease-out_forwards]">
-                    <div className="w-24 h-24 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 shadow-[0_0_40px_rgba(16,185,129,0.4)]">
-                        <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <div className="min-h-screen relative overflow-hidden flex items-center justify-center">
+                {/* Popup toast */}
+                <BookingToast name={formData.name.split(' ')[0]} roomName={room.name} />
+
+                {/* Background room image + overlay */}
+                <div className="absolute inset-0">
+                    <img
+                        src={room.imageUrl}
+                        alt={room.name}
+                        className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-br from-stone-950/95 via-stone-900/85 to-amber-950/70" />
+                </div>
+
+                {/* Floating card */}
+                <div className="relative z-10 max-w-lg w-full mx-6 animate-[fade-in_0.8s_ease-out_forwards]">
+                    {/* Glowing orb */}
+                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mx-auto mb-8 shadow-[0_0_60px_rgba(52,211,153,0.4)]">
+                        <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-light mb-4">Reservation Confirmed</h1>
-                    <p className="text-stone-400 text-lg mb-2">We look forward to welcoming you, {formData.name}.</p>
-                    <p className="text-stone-500 text-sm mb-12">{formData.numberOfDays} night{formData.numberOfDays > 1 ? 's' : ''} · Total: ₦{totalAmount.toLocaleString()}</p>
 
-                    <div className="flex gap-4 justify-center">
-                        <Link
-                            href="/"
-                            className="px-8 py-4 border border-stone-800 hover:bg-stone-900 rounded-xl uppercase tracking-widest text-xs font-semibold transition-colors"
-                        >
-                            Return Home
-                        </Link>
-                        <Link
-                            href="/admin"
-                            className="px-8 py-4 bg-white text-stone-900 hover:bg-stone-200 rounded-xl uppercase tracking-widest text-xs font-semibold transition-colors"
-                        >
-                            Go to CEO Portal
-                        </Link>
+                    <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl px-8 py-10 text-center shadow-2xl">
+                        <p className="text-amber-400 text-xs uppercase tracking-[0.3em] font-semibold mb-4">Reservation Confirmed</p>
+                        <h1 className="text-4xl font-light text-white mb-3 leading-tight">
+                            See you soon,<br />
+                            <span className="font-semibold">{formData.name.split(' ')[0]}!</span>
+                        </h1>
+                        <p className="text-white/50 text-sm mb-8 leading-relaxed">
+                            Your <span className="text-white/80 font-medium">{room.name}</span> is reserved.
+                            <br />
+                            {formData.numberOfDays} night{formData.numberOfDays > 1 ? 's' : ''} · Total paid: <span className="text-amber-400 font-semibold">₦{totalAmount.toLocaleString()}</span>
+                        </p>
+
+                        {/* Divider */}
+                        <div className="border-t border-white/10 pt-6 mb-6 grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Check-In</p>
+                                <p className="text-white text-sm font-medium">{new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</p>
+                            </div>
+                            <div className="border-x border-white/10">
+                                <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Duration</p>
+                                <p className="text-white text-sm font-medium">{formData.numberOfDays}N</p>
+                            </div>
+                            <div>
+                                <p className="text-xs text-white/30 uppercase tracking-wider mb-1">Guest</p>
+                                <p className="text-white text-sm font-medium">{formData.hasGuest ? '2 Guests' : '1 Guest'}</p>
+                            </div>
+                        </div>
+
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <Link
+                                href="/"
+                                className="flex-1 px-6 py-3.5 bg-white/10 hover:bg-white/15 border border-white/10 text-white rounded-xl uppercase tracking-widest text-xs font-semibold transition-all text-center"
+                            >
+                                ← Back Home
+                            </Link>
+                            <Link
+                                href="/rooms"
+                                className="flex-1 px-6 py-3.5 bg-amber-500 hover:bg-amber-400 text-stone-950 rounded-xl uppercase tracking-widest text-xs font-semibold transition-all text-center"
+                            >
+                                Browse Suites
+                            </Link>
+                        </div>
                     </div>
+
+                    <p className="text-center text-white/20 text-xs mt-6">
+                        A confirmation email has been sent to {formData.email}
+                    </p>
                 </div>
             </div>
         );
     }
 
+    // ─── BOOKING FORM ─────────────────────────────────────────────────────────
     return (
         <div className="min-h-screen bg-stone-50 pt-32 pb-24 px-8 md:px-16 text-stone-900 flex justify-center animate-fade-in">
             <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-16">
@@ -110,7 +183,7 @@ function CheckoutContent() {
 
                     <div className="bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 mb-8 p-6">
                         <div className="relative h-48 rounded-xl overflow-hidden mb-6">
-                            <Image src={room.imageUrl} alt={room.name} fill className="object-cover" />
+                            <img src={room.imageUrl} alt={room.name} className="object-cover w-full h-full" />
                         </div>
                         <h2 className="text-2xl font-medium mb-2">{room.name}</h2>
                         <p className="text-stone-500 text-sm mb-6">{room.description}</p>
@@ -175,21 +248,9 @@ function CheckoutContent() {
                             <div>
                                 <label className="block text-xs font-medium text-stone-500 mb-2 uppercase tracking-wide">Number of Nights</label>
                                 <div className="flex items-center gap-4">
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, numberOfDays: Math.max(1, formData.numberOfDays - 1) })}
-                                        className="w-10 h-10 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg flex items-center justify-center text-stone-700 font-bold text-lg transition-colors"
-                                    >
-                                        −
-                                    </button>
+                                    <button type="button" onClick={() => setFormData({ ...formData, numberOfDays: Math.max(1, formData.numberOfDays - 1) })} className="w-10 h-10 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg flex items-center justify-center text-stone-700 font-bold text-lg transition-colors">−</button>
                                     <span className="text-2xl font-light w-12 text-center tabular-nums">{formData.numberOfDays}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setFormData({ ...formData, numberOfDays: Math.min(30, formData.numberOfDays + 1) })}
-                                        className="w-10 h-10 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg flex items-center justify-center text-stone-700 font-bold text-lg transition-colors"
-                                    >
-                                        +
-                                    </button>
+                                    <button type="button" onClick={() => setFormData({ ...formData, numberOfDays: Math.min(30, formData.numberOfDays + 1) })} className="w-10 h-10 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-lg flex items-center justify-center text-stone-700 font-bold text-lg transition-colors">+</button>
                                 </div>
                             </div>
 
@@ -201,9 +262,7 @@ function CheckoutContent() {
                                     onClick={() => setFormData({ ...formData, hasGuest: !formData.hasGuest, guestGender: '', guestAge: '' })}
                                     className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-300 ${formData.hasGuest ? 'bg-amber-500' : 'bg-stone-300'}`}
                                 >
-                                    <span
-                                        className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ${formData.hasGuest ? 'translate-x-6' : 'translate-x-1'}`}
-                                    />
+                                    <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-300 ${formData.hasGuest ? 'translate-x-6' : 'translate-x-1'}`} />
                                 </button>
                                 <span className="ml-3 text-sm text-stone-600">{formData.hasGuest ? 'Yes' : 'No'}</span>
                             </div>
@@ -270,7 +329,7 @@ function CheckoutContent() {
                     </form>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }
 

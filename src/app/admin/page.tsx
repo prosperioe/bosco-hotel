@@ -37,17 +37,46 @@ const navItems = [
 ];
 
 export default function AdminDashboard() {
-    const { ceoStats, rooms, addRoom, bookings } = useGlobalState();
+    const { ceoStats, rooms, addRoom, removeRoom, bookings } = useGlobalState();
     const [activeTab, setActiveTab] = useState('overview');
     const [showAddRoom, setShowAddRoom] = useState(false);
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [newRoom, setNewRoom] = useState({ name: '', price: '', description: '', image: '' });
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+    const [newRoom, setNewRoom] = useState({ name: '', price: '', description: '', image: '', imagePreview: '' });
+    const [isDragging, setIsDragging] = useState(false);
 
     useEffect(() => {
         if (typeof window !== 'undefined' && window.innerWidth >= 768) {
             setSidebarOpen(true);
         }
     }, []);
+
+    // Drag & drop image handler
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        setIsDragging(false);
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const base64 = ev.target?.result as string;
+                setNewRoom(prev => ({ ...prev, image: base64, imagePreview: base64 }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const base64 = ev.target?.result as string;
+                setNewRoom(prev => ({ ...prev, image: base64, imagePreview: base64 }));
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
     const totalRevAnim = useAnimatedCounter(ceoStats.totalRevenue);
     const totalBookAnim = useAnimatedCounter(ceoStats.totalBookings);
@@ -71,16 +100,17 @@ export default function AdminDashboard() {
 
     const handleAddRoom = (e: React.FormEvent) => {
         e.preventDefault();
+        const fallback = 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974&auto=format&fit=crop';
         addRoom({
             name: newRoom.name,
             pricePerNight: parseInt(newRoom.price),
             description: newRoom.description,
-            imageUrl: newRoom.image || 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974&auto=format&fit=crop',
-            images: [newRoom.image || 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974&auto=format&fit=crop'],
+            imageUrl: newRoom.image || fallback,
+            images: [newRoom.image || fallback],
             amenities: ['New Amenity', 'Premium Service']
         });
         setShowAddRoom(false);
-        setNewRoom({ name: '', price: '', description: '', image: '' });
+        setNewRoom({ name: '', price: '', description: '', image: '', imagePreview: '' });
     };
 
     const currentDate = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -525,22 +555,48 @@ export default function AdminDashboard() {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                 {rooms.map(room => (
-                                    <div key={room.id} className="bg-[#16161a] border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/20 transition-all group">
+                                    <div key={room.id} className="bg-[#16161a] border border-white/5 rounded-2xl overflow-hidden hover:border-amber-500/20 transition-all group relative">
+                                        {/* Booked overlay badge */}
+                                        {room.booked && (
+                                            <div className="absolute top-3 left-3 z-10 bg-stone-900/80 backdrop-blur-sm border border-amber-500/30 px-2.5 py-1 rounded-lg">
+                                                <span className="text-amber-400 text-[10px] uppercase tracking-widest font-semibold">🔒 Booked</span>
+                                            </div>
+                                        )}
                                         <div className="flex items-stretch">
                                             <div className="w-32 h-32 relative flex-shrink-0 bg-stone-800">
                                                 <img src={room.imageUrl} alt={room.name} className="w-full h-full object-cover" />
                                             </div>
-                                            <div className="p-5 flex-1 flex flex-col justify-between">
+                                            <div className="p-5 flex-1 flex flex-col justify-between min-w-0">
                                                 <div>
-                                                    <div className="flex items-center justify-between mb-1">
-                                                        <h4 className="text-white font-medium text-sm">{room.name}</h4>
-                                                        <span className="bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-lg text-[10px] uppercase tracking-wider font-medium">Active</span>
+                                                    <div className="flex items-center justify-between mb-1 gap-2">
+                                                        <h4 className="text-white font-medium text-sm truncate">{room.name}</h4>
+                                                        <span className={`px-2 py-0.5 rounded-lg text-[10px] uppercase tracking-wider font-medium flex-shrink-0 ${room.booked
+                                                                ? 'bg-amber-500/10 text-amber-400'
+                                                                : 'bg-emerald-500/10 text-emerald-400'
+                                                            }`}>{room.booked ? 'Booked' : 'Active'}</span>
                                                     </div>
                                                     <p className="text-stone-500 text-xs line-clamp-1">{room.description}</p>
                                                 </div>
                                                 <div className="flex items-center justify-between mt-3">
                                                     <span className="text-amber-500 font-semibold text-sm">₦{room.pricePerNight.toLocaleString()}<span className="text-stone-600 font-normal">/night</span></span>
-                                                    <span className="text-stone-600 font-mono text-[10px]">{room.id}</span>
+                                                    {/* Remove room button */}
+                                                    {confirmDelete === room.id ? (
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] text-stone-400">Remove?</span>
+                                                            <button onClick={() => { removeRoom(room.id); setConfirmDelete(null); }} className="text-[10px] px-2 py-1 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors">Yes</button>
+                                                            <button onClick={() => setConfirmDelete(null)} className="text-[10px] px-2 py-1 bg-white/5 text-stone-400 rounded-lg hover:bg-white/10 transition-colors">No</button>
+                                                        </div>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() => setConfirmDelete(room.id)}
+                                                            className="p-1.5 text-stone-600 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                                                            title="Remove suite"
+                                                        >
+                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                            </svg>
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </div>
                                         </div>
@@ -701,8 +757,37 @@ export default function AdminDashboard() {
                                 <textarea required rows={3} value={newRoom.description} onChange={e => setNewRoom({ ...newRoom, description: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all resize-none placeholder:text-stone-700" placeholder="Unrivaled luxury with panoramic views..." />
                             </div>
                             <div>
-                                <label className="block text-stone-400 mb-2 uppercase tracking-wide text-[10px] font-medium">Image URL (Optional)</label>
-                                <input type="text" value={newRoom.image} onChange={e => setNewRoom({ ...newRoom, image: e.target.value })} className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all placeholder:text-stone-700" placeholder="https://..." />
+                                <label className="block text-stone-400 mb-2 uppercase tracking-wide text-[10px] font-medium">Suite Image</label>
+                                <div
+                                    onDrop={handleDrop}
+                                    onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                                    onDragLeave={() => setIsDragging(false)}
+                                    className={`relative w-full h-36 rounded-xl border-2 border-dashed transition-all flex flex-col items-center justify-center cursor-pointer overflow-hidden ${isDragging ? 'border-amber-500 bg-amber-500/5' : 'border-white/10 hover:border-white/20'
+                                        }`}
+                                >
+                                    {newRoom.imagePreview ? (
+                                        <>
+                                            <img src={newRoom.imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                                                <span className="text-white text-xs font-medium">Change image</span>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="text-center px-4">
+                                            <svg className="w-8 h-8 text-stone-600 mx-auto mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                                            </svg>
+                                            <p className="text-stone-500 text-xs">Drag & drop an image here</p>
+                                            <p className="text-stone-700 text-[10px] mt-1">or click to browse files</p>
+                                        </div>
+                                    )}
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileInput}
+                                        className="absolute inset-0 opacity-0 cursor-pointer"
+                                    />
+                                </div>
                             </div>
                             <div className="pt-2 flex justify-end gap-3">
                                 <button type="button" onClick={() => setShowAddRoom(false)} className="px-5 py-2.5 text-stone-400 hover:text-white rounded-xl hover:bg-white/5 transition-all text-sm">Cancel</button>

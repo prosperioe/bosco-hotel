@@ -9,6 +9,7 @@ interface GlobalStateContextType {
     ceoStats: CEOStats;
     bookings: Booking[];
     addRoom: (room: Omit<Room, 'id'>) => void;
+    removeRoom: (id: string) => void;
     addBooking: (booking: Omit<Booking, 'id' | 'date'>) => void;
 }
 
@@ -23,8 +24,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
         const newRoom: Room = {
             ...roomData,
             id: `r${rooms.length + 1}-${Date.now()}`,
+            booked: false,
         };
         setRooms(prev => [...prev, newRoom]);
+    };
+
+    const removeRoom = (id: string) => {
+        setRooms(prev => prev.filter(r => r.id !== id));
     };
 
     const addBooking = (bookingData: Omit<Booking, 'id' | 'date'>) => {
@@ -34,6 +40,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
             date: new Date().toISOString(),
         };
         setBookings(prev => [newBooking, ...prev]);
+
+        // Lock the booked room
+        setRooms(prev => prev.map(r => r.id === bookingData.roomId ? { ...r, booked: true } : r));
 
         // Update CEO stats instantly
         setCeoStats(prev => {
@@ -50,7 +59,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     };
 
     return (
-        <GlobalStateContext.Provider value={{ rooms, ceoStats, stats: [ceoStats], bookings, addRoom, addBooking }}>
+        <GlobalStateContext.Provider value={{ rooms, ceoStats, stats: [ceoStats], bookings, addRoom, removeRoom, addBooking }}>
             {children}
         </GlobalStateContext.Provider>
     );

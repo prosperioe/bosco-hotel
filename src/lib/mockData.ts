@@ -6,6 +6,7 @@ export interface Room {
   imageUrl: string;
   images: string[];
   amenities: string[];
+  booked?: boolean;
 }
 
 export interface Booking {
