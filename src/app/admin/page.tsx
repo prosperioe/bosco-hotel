@@ -40,8 +40,14 @@ export default function AdminDashboard() {
     const { ceoStats, rooms, addRoom, bookings } = useGlobalState();
     const [activeTab, setActiveTab] = useState('overview');
     const [showAddRoom, setShowAddRoom] = useState(false);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
     const [newRoom, setNewRoom] = useState({ name: '', price: '', description: '', image: '' });
+
+    useEffect(() => {
+        if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+            setSidebarOpen(true);
+        }
+    }, []);
 
     const totalRevAnim = useAnimatedCounter(ceoStats.totalRevenue);
     const totalBookAnim = useAnimatedCounter(ceoStats.totalBookings);
@@ -82,8 +88,16 @@ export default function AdminDashboard() {
     return (
         <div className="min-h-screen bg-[#0c0c0f] text-stone-300 font-sans selection:bg-amber-500/30 flex">
 
+            {/* Mobile Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black/60 z-30 md:hidden animate-fade-in"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
+
             {/* Sidebar */}
-            <aside className={`${sidebarOpen ? 'w-64' : 'w-20'} transition-all duration-300 bg-[#111114] border-r border-white/5 flex flex-col fixed h-full z-30`}>
+            <aside className={`fixed h-full z-40 transition-all duration-300 bg-[#111114] border-r border-white/5 flex flex-col ${sidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full w-64 md:w-20 md:translate-x-0'}`}>
                 {/* Logo */}
                 <div className="p-6 flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-amber-600 rounded-xl flex items-center justify-center text-stone-950 font-bold text-sm shadow-lg shadow-amber-500/20 flex-shrink-0">
@@ -107,8 +121,8 @@ export default function AdminDashboard() {
                             key={item.id}
                             onClick={() => setActiveTab(item.id)}
                             className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl mb-1 text-sm font-medium transition-all duration-200 ${activeTab === item.id
-                                    ? 'bg-amber-500/10 text-amber-500 shadow-sm'
-                                    : 'text-stone-500 hover:text-stone-300 hover:bg-white/5'
+                                ? 'bg-amber-500/10 text-amber-500 shadow-sm'
+                                : 'text-stone-500 hover:text-stone-300 hover:bg-white/5'
                                 }`}
                         >
                             <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -143,18 +157,28 @@ export default function AdminDashboard() {
             </aside>
 
             {/* Main Content */}
-            <main className={`flex-1 ${sidebarOpen ? 'ml-64' : 'ml-20'} transition-all duration-300`}>
+            <main className={`flex-1 min-w-0 transition-all duration-300 ${sidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
 
                 {/* Top Bar */}
-                <header className="sticky top-0 z-20 bg-[#0c0c0f]/80 backdrop-blur-xl border-b border-white/5 px-8 py-4 flex items-center justify-between">
-                    <div>
-                        <h2 className="text-white text-lg font-semibold">
-                            {activeTab === 'overview' && 'Dashboard Overview'}
-                            {activeTab === 'bookings' && 'Booking Management'}
-                            {activeTab === 'rooms' && 'Room Inventory'}
-                            {activeTab === 'guests' && 'Guest Analytics'}
-                        </h2>
-                        <p className="text-xs text-stone-500">{currentDate}</p>
+                <header className="sticky top-0 z-20 bg-[#0c0c0f]/80 backdrop-blur-xl border-b border-white/5 px-4 sm:px-8 py-4 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setSidebarOpen(!sidebarOpen)}
+                            className="md:hidden p-1.5 -ml-1.5 text-stone-400 hover:text-white rounded-lg hover:bg-white/5 transition-colors"
+                        >
+                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                            </svg>
+                        </button>
+                        <div>
+                            <h2 className="text-white text-base sm:text-lg font-semibold">
+                                {activeTab === 'overview' && 'Dashboard Overview'}
+                                {activeTab === 'bookings' && 'Booking Management'}
+                                {activeTab === 'rooms' && 'Room Inventory'}
+                                {activeTab === 'guests' && 'Guest Analytics'}
+                            </h2>
+                            <p className="text-[10px] sm:text-xs text-stone-500">{currentDate}</p>
+                        </div>
                     </div>
                     <div className="flex items-center gap-4">
                         {/* Notification bell */}
@@ -177,29 +201,29 @@ export default function AdminDashboard() {
                     </div>
                 </header>
 
-                <div className="p-8 animate-fade-in opacity-0" style={{ animationFillMode: 'forwards' }}>
+                <div className="p-4 sm:p-8 animate-fade-in opacity-0" style={{ animationFillMode: 'forwards' }}>
 
                     {/* ==================== OVERVIEW TAB ==================== */}
                     {activeTab === 'overview' && (
                         <>
                             {/* Welcome Banner */}
-                            <div className="bg-gradient-to-r from-amber-500/10 via-amber-600/5 to-transparent border border-amber-500/10 rounded-2xl p-6 mb-8 flex items-center justify-between">
+                            <div className="bg-gradient-to-r from-amber-500/10 via-amber-600/5 to-transparent border border-amber-500/10 rounded-2xl p-5 sm:p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                 <div>
                                     <h3 className="text-xl font-semibold text-white mb-1">Welcome back, Boss 👋</h3>
                                     <p className="text-stone-400 text-sm">Here&apos;s what&apos;s happening at Bosco Hotel today.</p>
                                 </div>
-                                <div className="hidden md:flex gap-3">
+                                <div className="flex w-full sm:w-auto gap-3">
                                     <button
                                         onClick={() => { setActiveTab('rooms'); setShowAddRoom(true); }}
-                                        className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-stone-950 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98]"
+                                        className="flex-1 sm:flex-none px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-stone-950 rounded-xl text-sm font-semibold transition-all hover:scale-[1.02] active:scale-[0.98] text-center"
                                     >
-                                        + Add Suite
+                                        + Suite
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('bookings')}
-                                        className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-sm font-medium transition-colors"
+                                        className="flex-1 sm:flex-none px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl text-sm font-medium transition-colors text-center"
                                     >
-                                        View Bookings
+                                        Bookings
                                     </button>
                                 </div>
                             </div>
@@ -373,8 +397,8 @@ export default function AdminDashboard() {
                                                 <div key={booking.id} className="flex items-center justify-between bg-white/[0.02] hover:bg-white/[0.04] rounded-xl px-5 py-4 transition-colors">
                                                     <div className="flex items-center gap-4">
                                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold ${booking.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' :
-                                                                booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
-                                                                    'bg-purple-500/10 text-purple-400'
+                                                            booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
+                                                                'bg-purple-500/10 text-purple-400'
                                                             }`}>
                                                             {booking.guestName.charAt(0).toUpperCase()}
                                                         </div>
@@ -437,8 +461,8 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4">
                                                             <div className="flex items-center gap-3">
                                                                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold ${booking.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' :
-                                                                        booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
-                                                                            'bg-purple-500/10 text-purple-400'
+                                                                    booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
+                                                                        'bg-purple-500/10 text-purple-400'
                                                                     }`}>
                                                                     {booking.guestName.charAt(0)}
                                                                 </div>
@@ -448,8 +472,8 @@ export default function AdminDashboard() {
                                                         <td className="px-6 py-4 text-stone-400">{room?.name || '—'}</td>
                                                         <td className="px-6 py-4">
                                                             <span className={`px-2.5 py-1 rounded-lg text-xs font-medium ${booking.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' :
-                                                                    booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
-                                                                        'bg-purple-500/10 text-purple-400'
+                                                                booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
+                                                                    'bg-purple-500/10 text-purple-400'
                                                                 }`}>{booking.gender || '—'}</span>
                                                         </td>
                                                         <td className="px-6 py-4 text-stone-400">{booking.age || '—'}</td>
@@ -607,8 +631,8 @@ export default function AdminDashboard() {
                                                 <div key={booking.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-4 hover:border-amber-500/10 transition-colors">
                                                     <div className="flex items-center gap-3 mb-3">
                                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold ${booking.gender === 'Male' ? 'bg-blue-500/10 text-blue-400' :
-                                                                booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
-                                                                    'bg-purple-500/10 text-purple-400'
+                                                            booking.gender === 'Female' ? 'bg-pink-500/10 text-pink-400' :
+                                                                'bg-purple-500/10 text-purple-400'
                                                             }`}>
                                                             {booking.guestName.charAt(0).toUpperCase()}
                                                         </div>
