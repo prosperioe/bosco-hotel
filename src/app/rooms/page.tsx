@@ -1,7 +1,6 @@
 'use client';
 
 import { useGlobalState } from '@/components/providers/GlobalStateProvider';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function RoomsPage() {
@@ -26,11 +25,10 @@ export default function RoomsPage() {
                             style={{ animationDelay: `${0.1 * index}s` }}
                         >
                             <div className="relative h-80 overflow-hidden">
-                                <Image
-                                    src={room.imageUrl}
+                                <img
+                                    src={room.imageUrl || 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974&auto=format&fit=crop'}
                                     alt={room.name}
-                                    fill
-                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    className="object-cover w-full h-full transition-transform duration-700 group-hover:scale-105"
                                 />
                                 <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-sm">
                                     <span className="font-semibold text-stone-900">{`₦${room.pricePerNight.toLocaleString()}`}</span>

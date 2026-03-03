@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useGlobalState } from '@/components/providers/GlobalStateProvider';
-import Image from 'next/image';
 import Link from 'next/link';
 
 export default function RoomDetailPage() {
@@ -56,12 +55,10 @@ export default function RoomDetailPage() {
                                     : 'opacity-0 scale-105'
                                     }`}
                             >
-                                <Image
-                                    src={img}
+                                <img
+                                    src={img || 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=1974&auto=format&fit=crop'}
                                     alt={`${room.name} - View ${index + 1}`}
-                                    fill
-                                    className="object-cover"
-                                    priority={index === 0}
+                                    className="object-cover w-full h-full"
                                 />
                             </div>
                         ))}
