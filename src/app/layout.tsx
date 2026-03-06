@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 import { GlobalStateProvider } from "@/components/providers/GlobalStateProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import Preloader from "@/components/Preloader";
 import Footer from "@/components/Footer";
 
@@ -29,14 +30,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-stone-50 text-stone-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <GlobalStateProvider>
-          <Preloader>
-            {children}
-            <Footer />
-          </Preloader>
-        </GlobalStateProvider>
+        <ThemeProvider>
+          <GlobalStateProvider>
+            <Preloader>
+              {children}
+              <Footer />
+            </Preloader>
+          </GlobalStateProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

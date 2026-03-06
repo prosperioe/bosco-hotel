@@ -10,27 +10,133 @@
   --animate-fade-in: fade-in 1s ease-out forwards;
 
   @keyframes draw-logo {
-    0% { stroke-dasharray: 100; stroke-dashoffset: 100; opacity: 0; }
-    20% { opacity: 1; }
-    100% { stroke-dasharray: 100; stroke-dashoffset: 0; opacity: 1; }
+    0% {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      opacity: 0;
+    }
+
+    20% {
+      opacity: 1;
+    }
+
+    100% {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }
   }
 
   @keyframes fade-in {
-    0% { opacity: 0; transform: translateY(10px); }
-    100% { opacity: 1; transform: translateY(0); }
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ─── Dark Mode (default) ─────────────────────────────────────────── */
+:root,
+html.dark {
+  --bg-primary: #0c0a09;
+  --bg-secondary: #1c1917;
+  --bg-card: #1c1917;
+  --bg-card-hover: #292524;
+  --bg-nav: rgba(12, 10, 9, 0.85);
+
+  --text-primary: #fafaf9;
+  --text-secondary: #a8a29e;
+  --text-muted: #57534e;
+
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-accent: rgba(245, 158, 11, 0.25);
+
+  --shadow-hero-overlay-l: rgba(12, 10, 9, 0.90);
+  --shadow-hero-overlay-m: rgba(12, 10, 9, 0.60);
+  --shadow-hero-overlay-r: rgba(12, 10, 9, 0.30);
+  --shadow-hero-bottom: rgba(12, 10, 9, 1);
+
+  --badge-bg: rgba(245, 158, 11, 0.10);
+  --badge-border: rgba(245, 158, 11, 0.20);
+
+  --price-badge-bg: rgba(12, 10, 9, 0.80);
+
+  /* section backgrounds */
+  --bg-features-section: #0c0a09;
 }
 
+/* ─── Light Mode ──────────────────────────────────────────────────── */
+html.light {
+  --bg-primary: #fafaf9;
+  --bg-secondary: #f5f5f4;
+  --bg-card: #ffffff;
+  --bg-card-hover: #f0ede9;
+  --bg-nav: rgba(255, 255, 255, 0.90);
+
+  --text-primary: #1c1917;
+  --text-secondary: #57534e;
+  --text-muted: #a8a29e;
+
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-accent: rgba(245, 158, 11, 0.40);
+
+  --shadow-hero-overlay-l: rgba(12, 10, 9, 0.75);
+  --shadow-hero-overlay-m: rgba(12, 10, 9, 0.45);
+  --shadow-hero-overlay-r: rgba(12, 10, 9, 0.15);
+  --shadow-hero-bottom: rgba(12, 10, 9, 0.85);
+
+  --badge-bg: rgba(245, 158, 11, 0.15);
+  --badge-border: rgba(245, 158, 11, 0.35);
+
+  --price-badge-bg: rgba(255, 255, 255, 0.85);
+
+  --bg-features-section: #f5f5f4;
+}
+
+/* ─── Global base ─────────────────────────────────────────────────── */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg-primary);
+  color: var(--text-primary);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  transition: background 0.4s ease, color 0.3s ease;
+}
+
+/* ─── Utility helpers consumed by components ─────────────────────── */
+.bosco-nav {
+  background: var(--bg-nav);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.4s ease, border-color 0.3s ease;
+}
+
+.bosco-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+}
+
+.bosco-card:hover {
+  background: var(--bg-card-hover);
+}
+
+.bosco-section {
+  background: var(--bg-features-section);
+  color: var(--text-primary);
+  transition: background 0.4s ease;
+}
+
+.bosco-text-secondary {
+  color: var(--text-secondary);
+}
+
+.bosco-text-muted {
+  color: var(--text-muted);
 }
