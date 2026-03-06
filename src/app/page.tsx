@@ -1,29 +1,62 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import ThemeToggle from '@/components/ThemeToggle';
+import { useTheme } from '@/components/providers/ThemeProvider';
 
 export default function Home() {
+  const { theme } = useTheme();
+
   return (
-    <main className="min-h-screen bg-stone-950">
+    <main className="min-h-screen" style={{ background: 'var(--bg-primary)' }}>
       {/* Navigation */}
-      <nav className="absolute top-0 w-full z-40 flex justify-between items-center px-8 sm:px-16 py-6 text-white">
+      <nav className="bosco-nav fixed top-0 w-full z-40 flex justify-between items-center px-8 sm:px-16 py-5">
+        {/* Logo */}
         <div className="flex items-center gap-3 cursor-pointer">
           <div className="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center">
             <svg className="w-5 h-5 text-stone-950" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 21h16.5M4.5 3h15M5.25 3v18m13.5-18v18M9 6.75h1.5m-1.5 3h1.5m-1.5 3h1.5m3-6H15m-1.5 3H15m-1.5 3H15M9 21v-3.375c0-.621.504-1.125 1.125-1.125h3.75c.621 0 1.125.504 1.125 1.125V21" />
             </svg>
           </div>
-          <span className="text-xl tracking-widest uppercase font-semibold">Bosco</span>
+          <span
+            className="text-xl tracking-widest uppercase font-semibold"
+            style={{ color: theme === 'dark' ? '#fafaf9' : '#1c1917' }}
+          >
+            Bosco
+          </span>
         </div>
-        <div className="hidden md:flex items-center gap-8 text-sm uppercase tracking-wider font-medium">
-          <Link href="/rooms" className="hover:text-amber-400 transition-colors">Our Suites</Link>
-          <Link href="/contact" className="hover:text-amber-400 transition-colors">Contact</Link>
-          <Link href="/admin" className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-stone-950 rounded-lg tracking-widest transition-colors">CEO Portal</Link>
+
+        {/* Nav links + toggle */}
+        <div className="flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-8 text-sm uppercase tracking-wider font-medium">
+            <Link
+              href="/rooms"
+              className="hover:text-amber-400 transition-colors"
+              style={{ color: theme === 'dark' ? '#fafaf9' : '#1c1917' }}
+            >
+              Our Suites
+            </Link>
+            <Link
+              href="/contact"
+              className="hover:text-amber-400 transition-colors"
+              style={{ color: theme === 'dark' ? '#fafaf9' : '#1c1917' }}
+            >
+              Contact
+            </Link>
+            <Link href="/admin" className="px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-stone-950 rounded-lg tracking-widest transition-colors">
+              CEO Portal
+            </Link>
+          </div>
+
+          {/* Dark / Light toggle */}
+          <ThemeToggle />
         </div>
       </nav>
 
-      {/* Hero Section — Sharp, Modern, Friendly */}
+      {/* Hero Section */}
       <section className="relative min-h-screen w-full flex items-center overflow-hidden">
-        {/* Background Image with multiple overlays for depth */}
+        {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
             src="https://images.unsplash.com/photo-1542314831-c6a4d27ce607?q=80&w=2070&auto=format&fit=crop"
@@ -33,33 +66,60 @@ export default function Home() {
             priority
           />
         </div>
-        {/* Gradient overlays for modern feel */}
-        <div className="absolute inset-0 bg-gradient-to-r from-stone-950/90 via-stone-950/60 to-stone-950/30 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-stone-950 via-transparent to-stone-950/20 z-10" />
+        {/* Gradient overlays */}
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            background: `linear-gradient(to right, var(--shadow-hero-overlay-l) 0%, var(--shadow-hero-overlay-m) 55%, var(--shadow-hero-overlay-r) 100%)`,
+          }}
+        />
+        <div
+          className="absolute inset-0 z-10"
+          style={{
+            background: `linear-gradient(to top, var(--shadow-hero-bottom) 0%, transparent 40%, rgba(12,10,9,0.15) 100%)`,
+          }}
+        />
 
-        {/* Content — Left aligned for a sharper look */}
+        {/* Content */}
         <div className="relative z-20 w-full max-w-7xl mx-auto px-8 sm:px-16 py-32">
           <div className="max-w-2xl">
             {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm rounded-full px-5 py-2 mb-8 animate-fade-in opacity-0" style={{ animationDelay: '0.2s', animationFillMode: 'forwards' }}>
+            <div
+              className="inline-flex items-center gap-2 backdrop-blur-sm rounded-full px-5 py-2 mb-8 animate-fade-in opacity-0"
+              style={{
+                background: 'var(--badge-bg)',
+                border: '1px solid var(--badge-border)',
+                animationDelay: '0.2s',
+                animationFillMode: 'forwards',
+              }}
+            >
               <span className="w-2 h-2 bg-amber-500 rounded-full animate-pulse" />
               <span className="text-amber-400 text-xs uppercase tracking-[0.3em] font-semibold">Premium Hospitality</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1] animate-fade-in opacity-0" style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}>
+            <h1
+              className="text-5xl md:text-7xl font-bold tracking-tight text-white mb-6 leading-[1.1] animate-fade-in opacity-0"
+              style={{ animationDelay: '0.4s', animationFillMode: 'forwards' }}
+            >
               Where Luxury
               <br />
               Meets <span className="text-amber-500">Comfort.</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="text-stone-400 text-lg md:text-xl leading-relaxed mb-10 max-w-lg animate-fade-in opacity-0" style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}>
+            <p
+              className="text-stone-300 text-lg md:text-xl leading-relaxed mb-10 max-w-lg animate-fade-in opacity-0"
+              style={{ animationDelay: '0.6s', animationFillMode: 'forwards' }}
+            >
               Experience world-class suites crafted for the modern traveler. Every detail designed to make your stay unforgettable.
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mb-16 animate-fade-in opacity-0" style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}>
+            <div
+              className="flex flex-col sm:flex-row gap-4 mb-16 animate-fade-in opacity-0"
+              style={{ animationDelay: '0.8s', animationFillMode: 'forwards' }}
+            >
               <Link
                 href="/rooms"
                 className="px-8 py-4 bg-amber-500 hover:bg-amber-600 text-stone-950 rounded-xl uppercase tracking-widest text-sm font-bold transition-all hover:scale-[1.02] active:scale-[0.98] text-center shadow-lg shadow-amber-500/20"
@@ -75,40 +135,46 @@ export default function Home() {
             </div>
 
             {/* Stats strip */}
-            <div className="grid grid-cols-3 gap-8 animate-fade-in opacity-0" style={{ animationDelay: '1s', animationFillMode: 'forwards' }}>
+            <div
+              className="grid grid-cols-3 gap-8 animate-fade-in opacity-0"
+              style={{ animationDelay: '1s', animationFillMode: 'forwards' }}
+            >
               <div>
                 <p className="text-3xl md:text-4xl font-bold text-white">4+</p>
-                <p className="text-xs text-stone-500 uppercase tracking-widest mt-1">Luxury Suites</p>
+                <p className="text-xs text-stone-400 uppercase tracking-widest mt-1">Luxury Suites</p>
               </div>
               <div>
                 <p className="text-3xl md:text-4xl font-bold text-white">98%</p>
-                <p className="text-xs text-stone-500 uppercase tracking-widest mt-1">Guest Rating</p>
+                <p className="text-xs text-stone-400 uppercase tracking-widest mt-1">Guest Rating</p>
               </div>
               <div>
                 <p className="text-3xl md:text-4xl font-bold text-white">24/7</p>
-                <p className="text-xs text-stone-500 uppercase tracking-widest mt-1">Concierge</p>
+                <p className="text-xs text-stone-400 uppercase tracking-widest mt-1">Concierge</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Decorative scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-fade-in opacity-0" style={{ animationDelay: '1.2s', animationFillMode: 'forwards' }}>
-          <span className="text-stone-500 text-xs uppercase tracking-[0.3em]">Scroll</span>
+        {/* Scroll indicator */}
+        <div
+          className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-fade-in opacity-0"
+          style={{ animationDelay: '1.2s', animationFillMode: 'forwards' }}
+        >
+          <span className="text-stone-400 text-xs uppercase tracking-[0.3em]">Scroll</span>
           <div className="w-px h-12 bg-gradient-to-b from-amber-500 to-transparent" />
         </div>
       </section>
 
       {/* Features Section */}
-      <section className="py-24 px-8 md:px-16 bg-stone-950">
+      <section className="bosco-section py-24 px-8 md:px-16">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div>
               <span className="text-amber-500 text-xs uppercase tracking-[0.3em] font-semibold mb-4 block">Why Bosco</span>
-              <h2 className="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 leading-tight" style={{ color: 'var(--text-primary)' }}>
                 A meticulously curated sanctuary for the modern traveler.
               </h2>
-              <p className="text-stone-400 mb-8 text-lg leading-relaxed">
+              <p className="bosco-text-secondary mb-8 text-lg leading-relaxed">
                 Every detail at Bosco has been designed to provide an unparalleled experience of elegance and comfort. From our award-winning culinary offerings to our private serene spa, your escape begins the moment you arrive.
               </p>
 
@@ -126,8 +192,8 @@ export default function Home() {
                       </svg>
                     </div>
                     <div>
-                      <p className="text-white font-medium">{feature.title}</p>
-                      <p className="text-stone-500 text-sm">{feature.desc}</p>
+                      <p className="font-medium" style={{ color: 'var(--text-primary)' }}>{feature.title}</p>
+                      <p className="bosco-text-muted text-sm">{feature.desc}</p>
                     </div>
                   </div>
                 ))}
@@ -140,7 +206,8 @@ export default function Home() {
                 </svg>
               </Link>
             </div>
-            <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl ring-1 ring-white/5">
+
+            <div className="relative h-[600px] rounded-2xl overflow-hidden shadow-2xl" style={{ border: '1px solid var(--border-subtle)' }}>
               <Image
                 src="https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=1760&auto=format&fit=crop"
                 alt="Luxury amenities"
@@ -148,9 +215,17 @@ export default function Home() {
                 className="object-cover"
               />
               {/* Price badge */}
-              <div className="absolute bottom-6 left-6 bg-stone-950/80 backdrop-blur-md border border-white/10 rounded-xl px-5 py-3">
-                <p className="text-xs text-stone-400 uppercase tracking-widest">Starting from</p>
-                <p className="text-2xl font-bold text-white">₦50,000<span className="text-sm font-normal text-stone-500">/night</span></p>
+              <div
+                className="absolute bottom-6 left-6 backdrop-blur-md rounded-xl px-5 py-3"
+                style={{
+                  background: 'var(--price-badge-bg)',
+                  border: '1px solid var(--border-subtle)',
+                }}
+              >
+                <p className="text-xs bosco-text-muted uppercase tracking-widest" style={{ color: 'var(--text-muted)' }}>Starting from</p>
+                <p className="text-2xl font-bold" style={{ color: 'var(--text-primary)' }}>
+                  ₦50,000<span className="text-sm font-normal bosco-text-muted">/night</span>
+                </p>
               </div>
             </div>
           </div>
